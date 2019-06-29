@@ -7,7 +7,8 @@ APCP: precipitation
 ```
 # level
 ```
- - ANNN for accumulation interval NNN
- - ZNNN for vertical level NNN
- - Z
+ - A for accumulation interval
+ - Z for vertical level
+ - P for for pressure level in hPa
+ - L for a generic level type
 ```
