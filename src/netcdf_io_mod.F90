@@ -80,7 +80,7 @@ contains
   subroutine netcdf_open(this, file_name)
 
     class(netcdf_type), intent(inout) :: this
-    character(*)     , intent(in)     :: file_name
+    character(*)      , intent(in)    :: file_name
 
     integer                           :: ncid
     
@@ -137,8 +137,8 @@ contains
   subroutine netcdf_get_coordinate_int(this, dimension_name, data)
 
     class(netcdf_type), intent(in)               :: this
-    character(*)     , intent(in)                :: dimension_name
-    integer          , allocatable, intent(out)  :: data(:)
+    character(*)      , intent(in)               :: dimension_name
+    integer           , allocatable, intent(out) :: data(:)
 
     integer                                      :: varid
     integer                                      :: n
@@ -171,12 +171,12 @@ contains
 
   subroutine netcdf_get_coordinate_real(this, dimension_name, data)
 
-    type(netcdf_type), intent(in)               :: this
-    character(*)     , intent(in)               :: dimension_name
-    real             , allocatable, intent(out) :: data(:)
+    class(netcdf_type), intent(in)               :: this
+    character(*)      , intent(in)               :: dimension_name
+    real              , allocatable, intent(out) :: data(:)
 
-    integer                                     :: varid
-    integer                                     :: n
+    integer                                      :: varid
+    integer                                      :: n
 
     if (.not. this%inquire_end)       stop "Error: netcdf_inquire_coordinate not done."
 
@@ -206,11 +206,11 @@ contains
 
   subroutine netcdf_get_data_short(this, variable_name, data)
 
-    type(netcdf_type), intent(in)  :: this
-    character(*)     , intent(in)  :: variable_name
-    integer(2)       , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
+    class(netcdf_type), intent(in)  :: this
+    character(*)      , intent(in)  :: variable_name
+    integer(2)        , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
 
-    integer                        :: varid
+    integer                         :: varid
 
     if (.not. this%inquire_end)       stop "Error: netcdf_inquire_coordinate not done."
 
@@ -222,11 +222,11 @@ contains
 
   subroutine netcdf_get_data_int(this, variable_name, data)
 
-    type(netcdf_type), intent(in)  :: this
-    character(*)     , intent(in)  :: variable_name
-    integer(4)       , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
+    class(netcdf_type), intent(in)  :: this
+    character(*)      , intent(in)  :: variable_name
+    integer(4)        , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
 
-    integer                        :: varid
+    integer                         :: varid
 
     if (.not. this%inquire_end)       stop "Error: netcdf_inquire_coordinate not done."
 
@@ -238,11 +238,11 @@ contains
 
   subroutine netcdf_get_data_long(this, variable_name, data)
 
-    type(netcdf_type), intent(in)  :: this
-    character(*)     , intent(in)  :: variable_name
-    integer(8)       , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
+    class(netcdf_type), intent(in)  :: this
+    character(*)      , intent(in)  :: variable_name
+    integer(8)        , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
 
-    integer                        :: varid
+    integer                         :: varid
 
     if (.not. this%inquire_end)       stop "Error: netcdf_inquire_coordinate not done."
 
@@ -254,12 +254,12 @@ contains
 
   subroutine netcdf_get_data_float(this, variable_name, data)
 
-    type(netcdf_type), intent(in)  :: this
-    character(*)     , intent(in)  :: variable_name
-    real(4)          , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
+    class(netcdf_type), intent(in)  :: this
+    character(*)      , intent(in)  :: variable_name
+    real(4)           , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
 
-    integer                        :: varid
-
+    integer                         :: varid
+ 
     if (.not. this%inquire_end)       stop "Error: netcdf_inquire_coordinate not done."
 
     call check(nf90_inq_varid(this%ncid, variable_name, varid))
@@ -270,11 +270,11 @@ contains
 
   subroutine netcdf_get_data_double(this, variable_name, data)
 
-    type(netcdf_type), intent(in)  :: this
-    character(*)     , intent(in)  :: variable_name
-    real(8)          , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
+    class(netcdf_type), intent(in)  :: this
+    character(*)      , intent(in)  :: variable_name
+    real(8)           , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
 
-    integer                        :: varid
+    integer                         :: varid
 
     if (.not. this%inquire_end)       stop "Error: netcdf_inquire_coordinate not done."
 
@@ -286,10 +286,10 @@ contains
 
   subroutine netcdf_create(this, file_name)
 
-    type(netcdf_type), intent(inout) :: this
-    character(*)     , intent(in)    :: file_name
+    class(netcdf_type), intent(inout) :: this
+    character(*)      , intent(in)    :: file_name
 
-    integer                          :: ncid
+    integer                           :: ncid
 
     if (allocated(this%iotype)) stop "Error: netcdf file have been open or create."
 
@@ -304,27 +304,27 @@ contains
 
   subroutine netcdf_define_coordinate(this, nx, ny, nz, nt)
 
-    type(netcdf_type)    , intent(inout)             :: this
-    logical              , optional     , intent(in) :: nx
-    logical              , optional     , intent(in) :: ny
-    logical              , optional     , intent(in) :: nz
-    logical              , optional     , intent(in) :: nt
+    class(netcdf_type) , intent(inout)             :: this
+    logical            , optional     , intent(in) :: nx
+    logical            , optional     , intent(in) :: ny
+    logical            , optional     , intent(in) :: nz
+    logical            , optional     , intent(in) :: nt
     
-    type(hash_table_iterator_type)                   :: iter
+    type(hash_table_iterator_type)                 :: iter
 
-    integer                                          :: x_varid
-    integer                                          :: y_varid
-    integer                                          :: z_varid
-    integer                                          :: t_varid
-    integer                                          :: x_dimid
-    integer                                          :: y_dimid
-    integer                                          :: z_dimid
-    integer                                          :: t_dimid
-    logical                                          :: is_x_dim_def = .false.
-    logical                                          :: is_y_dim_def = .false.
-    logical                                          :: is_z_dim_def = .false.
-    logical                                          :: is_t_dim_def = .false.
-    integer                                          :: dim_number
+    integer                                        :: x_varid
+    integer                                        :: y_varid
+    integer                                        :: z_varid
+    integer                                        :: t_varid
+    integer                                        :: x_dimid
+    integer                                        :: y_dimid
+    integer                                        :: z_dimid
+    integer                                        :: t_dimid
+    logical                                        :: is_x_dim_def = .false.
+    logical                                        :: is_y_dim_def = .false.
+    logical                                        :: is_z_dim_def = .false.
+    logical                                        :: is_t_dim_def = .false.
+    integer                                        :: dim_number
 
     if (.not. allocated(this%iotype)) stop "Error: netcdf file have not open or create."
     if (this%iotype /= "write")       stop "Error: netcdf open model is not write model."
@@ -463,7 +463,7 @@ contains
 
   subroutine netcdf_define_variable(this, variable_name, data_type, attribute)
 
-    type(netcdf_type)    , intent(inout)             :: this
+    class(netcdf_type)   , intent(inout)             :: this
     character(*)         , intent(in)                :: variable_name
     integer              , intent(in)                :: data_type
     type(hash_table_type), optional     , intent(in) :: attribute   
@@ -497,44 +497,44 @@ contains
   end subroutine netcdf_define_variable
 
   
-  subroutine netcdf_define_global(ncid, data_type, attribute)
+  subroutine netcdf_define_global(ncid, attribute)
 
-    integer              , intent(in)           :: ncid
+    class(netcdf_type)             , intent(in) :: this
     type(hash_table_type), optional, intent(in) :: attribute
     
     type(datetime_type)                         :: datetime
 
     call datetime%init()
 
-    call check(nf90_put_att(ncid, nf90_global, "creation_date", trim(datetime%isoformat())))
+    call check(nf90_put_att(this%ncid, nf90_global, "creation_date", trim(datetime%isoformat())))
     
     if(precent(attribute)) then
       iter = hash_table_iterator(attribute)
       do while (.not. iter%ended())
         select type (value => iter%value)
         type is (character(*))
-          call check(nf90_put_att(ncid, f90_global, iter%key, iter%value))
+          call check(nf90_put_att(this%ncid, f90_global, iter%key, iter%value))
         type is (integer)
-          call check(nf90_put_att(ncid, f90_global, iter%key, iter%value))
+          call check(nf90_put_att(this%ncid, f90_global, iter%key, iter%value))
         type is (real)
-          call check(nf90_put_att(ncid, f90_global, iter%key, iter%value))
+          call check(nf90_put_att(this%ncid, f90_global, iter%key, iter%value))
         end select
         call iter%next()
       end do
     end if
 
-    call check(nf90_enddef(ncid))
+    call check(nf90_enddef(this%ncid))
 
   end subroutine netcdf_define_global
 
 
   subroutine netcdf_write_coordinate(this, lon, lat, lev, time)
 
-    type(netcdf_type), intent(in)           :: this
-    real             , intent(in), optional :: lon(:)
-    real             , intent(in), optional :: lat(:)
-    integer          , intent(in), optional :: lev(:)
-    real             , intent(in), optional :: time(:)
+    class(netcdf_type), intent(in)           :: this
+    real              , intent(in), optional :: lon(:)
+    real              , intent(in), optional :: lat(:)
+    integer           , intent(in), optional :: lev(:)
+    real              , intent(in), optional :: time(:)
 
     if (.not. allocated(this%iotype)) stop "Error: netcdf file have not open or create."
     if (this%iotype /= "write")       stop "Error: netcdf open model is not write model."
@@ -552,9 +552,9 @@ contains
 
   subroutine netcdf_write_data_short(this, variable_name, data)
 
-    type(netcdf_type), intent(in) :: this
-    integer(2)       , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
-    character(*)     , intent(in) :: variable_name
+    class(netcdf_type), intent(in) :: this
+    integer(2)        , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
+    character(*)      , intent(in) :: variable_name
 
     integer                       :: varid
 
@@ -571,9 +571,9 @@ contains
 
   subroutine netcdf_write_data_int(this, variable_name, data)
 
-    type(netcdf_type), intent(in) :: this
-    integer(4)       , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
-    character(*)     , intent(in) :: variable_name
+    class(netcdf_type), intent(in) :: this
+    integer(4)        , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
+    character(*)      , intent(in) :: variable_name
 
     integer                       :: varid
 
@@ -590,9 +590,9 @@ contains
 
   subroutine netcdf_write_data_long(this, variable_name, data)
 
-    type(netcdf_type), intent(in) :: this
-    integer(8)       , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
-    character(*)     , intent(in) :: variable_name
+    class(netcdf_type), intent(in) :: this
+    integer(8)        , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
+    character(*)      , intent(in) :: variable_name
 
     integer                       :: varid
 
@@ -609,9 +609,9 @@ contains
 
   subroutine netcdf_write_data_float(this, variable_name, data)
 
-    type(netcdf_type), intent(in) :: this
-    real(4)          , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
-    character(*)     , intent(in) :: variable_name
+    class(netcdf_type), intent(in) :: this
+    real(4)           , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
+    character(*)      , intent(in) :: variable_name
 
     integer                       :: varid
 
@@ -628,9 +628,9 @@ contains
 
   subroutine netcdf_write_data_double(this, variable_name, data)
 
-    type(netcdf_type), intent(in) :: this
-    real(8)          , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
-    character(*)     , intent(in) :: variable_name
+    class(netcdf_type), intent(in) :: this
+    real(8)           , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
+    character(*)      , intent(in) :: variable_name
 
     integer                       :: varid
 
@@ -647,7 +647,7 @@ contains
 
   subroutine netcdf_close(this)
 
-    type(netcdf_type), intent(in) :: this
+    class(netcdf_type), intent(in) :: this
 
     call check(nf90_close(this%ncid))
 
