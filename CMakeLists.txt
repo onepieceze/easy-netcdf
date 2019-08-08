@@ -8,6 +8,7 @@ endif ()
 
 if (${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
   add_subdirectory(lib/container)
+  add_subdirectory(lib/datetime)
 endif ()
 
 if (DEFINED ENV{NETCDF} AND (NOT DEFINED ENV{NETCDF_ROOT}))
@@ -27,4 +28,8 @@ set (sources
   src/easy_netcdf.F90
 )
 
+set(CMAKE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+
 add_library (easy_netcdf SHARED ${sources})
+
+target_link_libraries(easy_netcdf fortran_container fortran_datetime netcdff)

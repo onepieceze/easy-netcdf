@@ -4,8 +4,9 @@ module netcdf_io_mod
 
   use netcdf
   use datetime
-  use link_list_type
-  use netcdf_tools_mod
+  use linked_list_mod
+  use hash_table_mod
+  use netcdf_tool_mod
 
   implicit none
 
@@ -35,7 +36,7 @@ module netcdf_io_mod
     type(dimension_type)               :: y
     type(dimension_type)               :: z
     type(dimension_type)               :: t
-    type(link_list_type)     , private :: variable_list
+    type(linked_list_type)   , private :: variable_list
     logical                  , private :: define_end  = .false.
     logical                  , private :: inquire_end = .false.
   contains
@@ -78,10 +79,10 @@ contains
 
   subroutine netcdf_open(this, file_name)
 
-    type(netcdf_type), intent(inout) :: this
-    character(*)     , intent(in)    :: file+name
+    class(netcdf_type), intent(inout) :: this
+    character(*)     , intent(in)     :: file_name
 
-    integer                          :: ncid
+    integer                           :: ncid
     
     if (allocated(this%iotype)) stop "Error: netcdf file have been open or create."
 
@@ -96,12 +97,12 @@ contains
 
   subroutine netcdf_inquire_coordinate(this)
     
-    type(netcdf_type), intent(inout) :: this
+    class(netcdf_type), intent(inout) :: this
 
-    character(20)                    :: dimension_name   
-    integer                          :: dimension_number
-    integer                          :: i
-    integer                          :: length
+    character(20)                     :: dimension_name   
+    integer                           :: dimension_number
+    integer                           :: i
+    integer                           :: length
 
     if (.not. allocated(this%iotype)) stop "Error: netcdf file is not open or create."
     if (this%iotype /= "read")        stop "Error: netcdf file open model is not read model."
@@ -135,12 +136,12 @@ contains
 
   subroutine netcdf_get_coordinate_int(this, dimension_name, data)
 
-    type(netcdf_type), intent(in)               :: this
-    character(*)     , intent(in)               :: dimension_name
-    integer          , allocatable, intent(out) :: data(:)
+    class(netcdf_type), intent(in)               :: this
+    character(*)     , intent(in)                :: dimension_name
+    integer          , allocatable, intent(out)  :: data(:)
 
-    integer                                     :: varid
-    integer                                     :: n
+    integer                                      :: varid
+    integer                                      :: n
 
     if (.not. this%inquire_end)       stop "Error: netcdf_inquire_coordinate not done."
 
@@ -148,19 +149,19 @@ contains
     case("lon", "longitude")
       if (this%x%varid == -999) stop "Error: netcdf_inquire_coordinate not done or dimension not exist."
       allocate(data(this%x%length))
-      call (check(nf90_get_var(this%ncid, this%x%varid, data)))
+      call check(nf90_get_var(this%ncid, this%x%varid, data))
     case("lat", "latitude")
       if (this%y%varid == -999) stop "Error: netcdf_inquire_coordinate not done or dimension not exist."
       allocate(data(this%y%length))
-      call (check(nf90_get_var(this%ncid, this%y%varid, data)))
+      call check(nf90_get_var(this%ncid, this%y%varid, data))
     case("lev", "level", "height", "altitude", "depth")
       if (this%z%varid == -999) stop "Error: netcdf_inquire_coordinate not done or dimension not exist."
       allocate(data(this%z%length))
-      call (check(nf90_get_var(this%ncid, this%z%varid, data)))
+      call check(nf90_get_var(this%ncid, this%z%varid, data))
     case("time")
       if (this%t%varid == -999) stop "Error: netcdf_inquire_coordinate not done or dimension not exist."
       allocate(data(this%t%length))
-      call (check(nf90_get_var(this%ncid, this%t_varid, data)))
+      call check(nf90_get_var(this%ncid, this%t_varid, data))
     case default
       stop "Error: input dimension name is not correct."
     end select
@@ -183,19 +184,19 @@ contains
     case("lon", "longitude")
       if (this%x%varid == -999) stop "Error: netcdf_inquire_coordinate not done or dimension not exist."
       allocate(data(this%x%length))
-      call (check(nf90_get_var(this%ncid, this%x%varid, data)))
+      call check(nf90_get_var(this%ncid, this%x%varid, data))
     case("lat", "latitude")
       if (this%y%varid == -999) stop "Error: netcdf_inquire_coordinate not done or dimension not exist."
       allocate(data(this%y%length))
-      call (check(nf90_get_var(this%ncid, this%y%varid, data)))
+      call check(nf90_get_var(this%ncid, this%y%varid, data))
     case("lev", "level", "height", "altitude", "depth")
       if (this%z%varid == -999) stop "Error: netcdf_inquire_coordinate not done or dimension not exist."
       allocate(data(this%z%length))
-      call (check(nf90_get_var(this%ncid, this%z%varid, data)))
+      call check(nf90_get_var(this%ncid, this%z%varid, data))
     case("time")
       if (this%t%varid == -999) stop "Error: netcdf_inquire_coordinate not done or dimension not exist."
       allocate(data(this%t%length))
-      call (check(nf90_get_var(this%ncid, this%t%varid, data)))
+      call check(nf90_get_var(this%ncid, this%t%varid, data))
     case default
       stop "Error: input dimension name is not correct."
     end select
@@ -207,7 +208,7 @@ contains
 
     type(netcdf_type), intent(in)  :: this
     character(*)     , intent(in)  :: variable_name
-    integer(2)       , intent(out) :: date(this%x%length, this%y%length, this%z%length, this%t%length)
+    integer(2)       , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
 
     integer                        :: varid
 
@@ -223,7 +224,7 @@ contains
 
     type(netcdf_type), intent(in)  :: this
     character(*)     , intent(in)  :: variable_name
-    integer(4)       , intent(out) :: date(this%x%length, this%y%length, this%z%length, this%t%length)
+    integer(4)       , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
 
     integer                        :: varid
 
@@ -239,7 +240,7 @@ contains
 
     type(netcdf_type), intent(in)  :: this
     character(*)     , intent(in)  :: variable_name
-    integer(8)       , intent(out) :: date(this%x%length, this%y%length, this%z%length, this%t%length)
+    integer(8)       , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
 
     integer                        :: varid
 
@@ -255,7 +256,7 @@ contains
 
     type(netcdf_type), intent(in)  :: this
     character(*)     , intent(in)  :: variable_name
-    real(4)          , intent(out) :: date(this%x%length, this%y%length, this%z%length, this%t%length)
+    real(4)          , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
 
     integer                        :: varid
 
@@ -271,7 +272,7 @@ contains
 
     type(netcdf_type), intent(in)  :: this
     character(*)     , intent(in)  :: variable_name
-    real(8)          , intent(out) :: date(this%x%length, this%y%length, this%z%length, this%t%length)
+    real(8)          , intent(out) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
 
     integer                        :: varid
 
@@ -352,10 +353,10 @@ contains
       else
         call check(nf90_def_dim(this%ncid, "lon", nx, x_dimid))
         call check(nf90_def_var(this%ncid, "lon", nf90_real, x_dimid, x_varid))
-        call check(nf90_put_att(this%ncid, x_varid. "long_name", "longitude"))
+        call check(nf90_put_att(this%ncid, x_varid, "long_name", "longitude"))
         call check(nf90_put_att(this%ncid, x_varid, "units", "degrees_east"))
       end if
-      this%x%varid
+      this%x%varid = x_varid
       this%x%length = nx
     end if
 
@@ -382,7 +383,7 @@ contains
         call check(nf90_def_var(this%ncid, "lat", nf90_real, y_dimid, y_varid))
         call check(nf90_put_att(this%ncid, y_varid, "long_name", "latitude"))
         call check(nf90_put_att(this%ncid, y_varid, "units", "degrees_north"))
-        this%y%varid
+        this%y%varid = y_varid
         this%y%length = ny
       end if
     end if
@@ -410,7 +411,7 @@ contains
         call check(nf90_def_var(this%ncid, "level", nf90_int, z_dimid, z_varid))
         call check(nf90_put_att(this%ncid, z_varid, "long_name", "Isobaric surface"))
         call check(nf90_put_att(this%ncid, z_varid, "units", "Pa"))
-        this%z%varid
+        this%z%varid = z_varid
         this%z%length = nz
       end if
     end if
@@ -438,7 +439,7 @@ contains
         call check(nf90_def_var(ncid, "time", nf90_double, t_dimid, t_varid))
         call check(nf90_put_att(ncid, t_varid, "long_name", "Time"))
         call check(nf90_put_att(ncid, t_varid, "units", "seconds since 1970-01-01 00:00"))
-        this%t%varid
+        this%t%varid = t_varid
         this%t%length = nt
       end if
     end if
@@ -476,7 +477,7 @@ contains
     if (.not. allocated(this%dimdis)) stop "Error: netcdf file dimension was not define."
 
     call check(nf90_def_var(this%ncid, "APCP", data_type, this%dimids, varid))
-    variable_list%append(variable_name, varid)
+    call variable_list%append(variable_name, varid)
 
     if(precent(attribute)) then
       iter = hash_table_iterator(attribute)
@@ -499,7 +500,7 @@ contains
   subroutine netcdf_define_global(ncid, data_type, attribute)
 
     integer              , intent(in)           :: ncid
-    type(hash_table_type), optional, intent(in) :: attribution_table
+    type(hash_table_type), optional, intent(in) :: attribute
     
     type(datetime_type)                         :: datetime
 
@@ -511,7 +512,7 @@ contains
       iter = hash_table_iterator(attribute)
       do while (.not. iter%ended())
         select type (value => iter%value)
-        type is (character(len*))
+        type is (character(*))
           call check(nf90_put_att(ncid, f90_global, iter%key, iter%value))
         type is (integer)
           call check(nf90_put_att(ncid, f90_global, iter%key, iter%value))
@@ -527,7 +528,7 @@ contains
   end subroutine netcdf_define_global
 
 
-  subroutine netcdf_write_coordinate(this, longitude, latitude, level, time)
+  subroutine netcdf_write_coordinate(this, lon, lat, lev, time)
 
     type(netcdf_type), intent(in)           :: this
     real             , intent(in), optional :: lon(:)
@@ -609,7 +610,7 @@ contains
   subroutine netcdf_write_data_float(this, variable_name, data)
 
     type(netcdf_type), intent(in) :: this
-    real(4)          , intent(in) :: data(this%nx, this%y%length, this%z%length, this%t%length)
+    real(4)          , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
     character(*)     , intent(in) :: variable_name
 
     integer                       :: varid
@@ -628,7 +629,7 @@ contains
   subroutine netcdf_write_data_double(this, variable_name, data)
 
     type(netcdf_type), intent(in) :: this
-    real(8)          , intent(in) :: data(this%nx, this%y%length, this%z%length, this%t%length)
+    real(8)          , intent(in) :: data(this%x%length, this%y%length, this%z%length, this%t%length)
     character(*)     , intent(in) :: variable_name
 
     integer                       :: varid
