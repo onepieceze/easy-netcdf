@@ -28,7 +28,7 @@ set (sources
   src/easy_netcdf.F90
 )
 
-set(CMAKE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 add_library (easy_netcdf SHARED ${sources})
 
