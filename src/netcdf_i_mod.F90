@@ -45,10 +45,12 @@ contains
 
     type(linked_list_item_type), pointer             :: item
     integer                                          :: i
+    class(*)                   , pointer             :: value
 
     do i=1, attribute%size
-      item => attribute%value_at(i)
-      select type (value => item%value)
+      item => attribute%item_at(i)
+      value => item%value
+      select type (value)
       type is (character(*))
         call check(nf90_get_att(ncid, varid, item%key, value))
       type is (integer(2))
@@ -73,56 +75,61 @@ contains
     type(linked_list_type), pointer, intent(in) :: variable_list
 
     integer                                     :: i
+    type(variable_type)   , pointer             :: variable
     integer                                     :: varid
+    class(*)              , pointer             :: value_2d(:, :)
+    class(*)              , pointer             :: value_3d(:, :, :)
+    class(*)              , pointer             :: value_4d(:, :, :, :)
 
     do i=1, variable_list%size
-      select type (value => variable_list%value_at(i))
-      type is (variable_type)
-        call check(nf90_inq_varid(ncid, value%name, varid))
-        if (associated(value%value_2d)) then
-          select type (value_2d => value%value_2d)
-          type is (integer(2))
-            call check(nf90_get_var(ncid, varid, value_2d))
-          type is (integer(4))
-            call check(nf90_get_var(ncid, varid, value_2d))
-          type is (integer(8))
-            call check(nf90_get_var(ncid, varid, value_2d))
-          type is (real(4))
-            call check(nf90_get_var(ncid, varid, value_2d))
-          type is (real(8))
-            call check(nf90_get_var(ncid, varid, value_2d))
-          end select
-        end if
-        if (associated(value%value_3d)) then
-          select type (value_3d => value%value_3d)
-          type is (integer(2))
-            call check(nf90_get_var(ncid, varid, value_3d))
-          type is (integer(4))
-            call check(nf90_get_var(ncid, varid, value_3d))
-          type is (integer(8))
-            call check(nf90_get_var(ncid, varid, value_3d))
-          type is (real(4))
-            call check(nf90_get_var(ncid, varid, value_3d))
-          type is (real(8))
-            call check(nf90_get_var(ncid, varid, value_3d))
-          end select
-        end if
-        if (associated(value%value_3d)) then
-          select type (value_3d => value%value_3d)
-          type is (integer(2))
-            call check(nf90_get_var(ncid, varid, value_3d))
-          type is (integer(4))
-            call check(nf90_get_var(ncid, varid, value_3d))
-          type is (integer(8))
-            call check(nf90_get_var(ncid, varid, value_3d))
-          type is (real(4))
-            call check(nf90_get_var(ncid, varid, value_3d))
-          type is (real(8))
-            call check(nf90_get_var(ncid, varid, value_3d))
-          end select
-        end if
-        call netcdf_read_attribute(ncid, varid, value%get_attribute())
-      end select
+      variable => variable_list%value_at(i)
+      call check(nf90_inq_varid(ncid, variable%name, varid))
+      if (associated(variable%value_2d)) then
+        value_2d => variable%value_2d
+        select type (value_2d)
+        type is (integer(2))
+          call check(nf90_get_var(ncid, varid, value_2d))
+        type is (integer(4))
+          call check(nf90_get_var(ncid, varid, value_2d))
+        type is (integer(8))
+          call check(nf90_get_var(ncid, varid, value_2d))
+        type is (real(4))
+          call check(nf90_get_var(ncid, varid, value_2d))
+        type is (real(8))
+          call check(nf90_get_var(ncid, varid, value_2d))
+        end select
+      end if
+      if (associated(variable%value_3d)) then
+        value_3d => variable%value_3d
+        select type (value_3d)
+        type is (integer(2))
+          call check(nf90_get_var(ncid, varid, value_3d))
+        type is (integer(4))
+          call check(nf90_get_var(ncid, varid, value_3d))
+        type is (integer(8))
+          call check(nf90_get_var(ncid, varid, value_3d))
+        type is (real(4))
+          call check(nf90_get_var(ncid, varid, value_3d))
+        type is (real(8))
+          call check(nf90_get_var(ncid, varid, value_3d))
+        end select
+      end if
+      if (associated(variable%value_3d)) then
+        value_4d => variable%value_4d
+        select type (value_4d)
+        type is (integer(2))
+          call check(nf90_get_var(ncid, varid, value_4d))
+        type is (integer(4))
+          call check(nf90_get_var(ncid, varid, value_4d))
+        type is (integer(8))
+          call check(nf90_get_var(ncid, varid, value_4d))
+        type is (real(4))
+          call check(nf90_get_var(ncid, varid, value_4d))
+        type is (real(8))
+          call check(nf90_get_var(ncid, varid, value_4d))
+        end select
+      end if
+      call netcdf_read_attribute(ncid, varid, variable%get_attribute())
     end do
 
   end subroutine netcdf_read_variable

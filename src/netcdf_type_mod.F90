@@ -66,7 +66,7 @@ contains
 
     if (.not. associated(this%variable_list)) allocate(this%variable_list)
 
-    call this%variable_list%append(variable)
+    call this%variable_list%append_ptr(variable)
 
   end subroutine add_variable
 
@@ -83,7 +83,7 @@ contains
     integer                           :: length
     integer                           :: varid
 
-    if (this%iotype /= "r" .or. this%iotype /= "read") stop "Error: should be read model."
+    if (this%iotype /= "r" .and. this%iotype /= "read") stop "Error: should be read model."
 
     call check(nf90_inquire(ncid=this%ncid, ndimensions=dimension_number))
 
@@ -102,23 +102,24 @@ contains
       if (dimension_name == this%y%name) then
         print*, "Read y dimension:"
         call netcdf_read_coordinate(this%ncid, varid, this%y%get_value())
-        call netcdf_read_attribute(this%ncid, varid, this%x%get_attribute())
+        call netcdf_read_attribute(this%ncid, varid, this%y%get_attribute())
       end if
       if (dimension_name == this%z%name) then
         print*, "Read z dimension:"
-        call netcdf_read_coordinate(this%ncid, varid, this%y%get_value())
-        call netcdf_read_attribute(this%ncid, varid, this%x%get_attribute())
+        call netcdf_read_coordinate(this%ncid, varid, this%z%get_value())
+        call netcdf_read_attribute(this%ncid, varid, this%z%get_attribute())
       end if
       if (dimension_name == this%t%name) then
         print*, "Read t dimension:"
-        call netcdf_read_coordinate(this%ncid, varid, this%y%get_value())
-        call netcdf_read_attribute(this%ncid, varid, this%x%get_attribute())
+        call netcdf_read_coordinate(this%ncid, varid, this%t%get_value())
+        call netcdf_read_attribute(this%ncid, varid, this%t%get_attribute())
       end if
     end do
 
     print*, "Read variable:"
     call netcdf_read_variable(this%ncid, this%variable_list)
 
+    print*, "Read global attribute:"
     call netcdf_read_attribute(this%ncid, nf90_global, this%get_global_attribute())
 
     call check(nf90_close(this%ncid))
@@ -128,25 +129,25 @@ contains
 
   subroutine write_netcdf(this)
 
-    class(netcdf_type), intent(in) :: this
+    class(netcdf_type), intent(inout) :: this
   
-    integer                        :: dimension_number
-    integer                        :: varid
-    integer                        :: x_dimid
-    integer                        :: y_dimid
-    integer                        :: z_dimid
-    integer                        :: t_dimid
-    integer, allocatable           :: dimids(:)
-    integer                        :: i
+    integer                           :: dimension_number
+    integer                           :: varid
+    integer                           :: x_dimid
+    integer                           :: y_dimid
+    integer                           :: z_dimid
+    integer                           :: t_dimid
+    integer, allocatable              :: dimids(:)
+    integer                           :: i
 
-    if (this%iotype /= "w" .or. this%iotype /= "write") stop "Error: should be write model."
+    if (this%iotype /= "w" .and. this%iotype /= "write") stop "Error: should be write model."
     
     dimension_number = 0
 
     print*, "Define x dimension:"
     if (allocated(this%x%name)) then
       call netcdf_define_coordinate(this%ncid, this%x%name, this%x%length(), this%x%xtype, x_dimid, varid)
-      call netcdf_define_attribute(this%ncid, varid, this%x%get_attribute)
+      call netcdf_define_attribute(this%ncid, varid, this%x%get_attribute())
       call this%x%set_varid(varid)
       dimension_number = dimension_number + 1
     end if
@@ -154,7 +155,7 @@ contains
     print*, "Define y dimension:"
     if (allocated(this%y%name)) then
       call netcdf_define_coordinate(this%ncid, this%y%name, this%y%length(), this%y%xtype, y_dimid, varid)
-      call netcdf_define_attribute(this%ncid, varid, this%y%get_attribute)
+      call netcdf_define_attribute(this%ncid, varid, this%y%get_attribute())
       call this%y%set_varid(varid)
       dimension_number = dimension_number + 1
     end if
@@ -162,7 +163,7 @@ contains
     print*, "Define z dimension:"
     if (allocated(this%z%name)) then
       call netcdf_define_coordinate(this%ncid, this%z%name, this%z%length(), this%z%xtype, z_dimid, varid)
-      call netcdf_define_attribute(this%ncid, varid, this%z%get_attribute)
+      call netcdf_define_attribute(this%ncid, varid, this%z%get_attribute())
       call this%z%set_varid(varid)
       dimension_number = dimension_number + 1
     end if
@@ -170,7 +171,7 @@ contains
     print*, "Define t dimension:"
     if (allocated(this%t%name)) then
       call netcdf_define_coordinate(this%ncid, this%t%name, this%t%length(), this%t%xtype, t_dimid, varid)
-      call netcdf_define_attribute(this%ncid, varid, this%t%get_attribute)
+      call netcdf_define_attribute(this%ncid, varid, this%t%get_attribute())
       call this%t%set_varid(varid)
       dimension_number = dimension_number + 1
     end if
@@ -194,7 +195,8 @@ contains
 
     deallocate(dimids)
 
-    call netcdf_define_global(this%ncid, this%get_global_attribute())
+    print*, "Define global attribute"
+    call netcdf_define_attribute(this%ncid, nf90_global, this%get_global_attribute())
 
     call check(nf90_enddef(this%ncid))
 
@@ -221,21 +223,20 @@ contains
     print*, "Write variable:"
     call netcdf_write_variable(this%ncid, this%variable_list)
 
-    call netcdf_define_attribute(this$ncid, nf90_global, this%get_global_attribute())
-
     call check(nf90_close(this%ncid))
 
   end subroutine write_netcdf
 
+
   subroutine set_global_attribute(this, key, value)
 
     class(netcdf_type), intent(inout) :: this
-    character         , intent(in)    :: key
+    character(*)      , intent(in)    :: key
     class(*)          , intent(in)    :: value
 
     if (.not. associated(this%global_attribute)) allocate(this%global_attribute)
 
-    call this%global_attribute%append(key, value)
+    call this%global_attribute%append_ptr(key, value)
 
   end subroutine set_global_attribute
 

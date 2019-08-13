@@ -8,37 +8,37 @@ program read_demo
   integer              :: lat(2)
   integer              :: data(2, 2)
   character(30)        :: x_long_name
-  character(30)        :: x_long_name
-  character(30)        :: unit
-  character            :: auther
+  character(30)        :: y_long_name
+  character(30)        :: units
+  character(30)        :: author
 
 
   call f%add_file("./test.nc", "r")
 
   f%x%name = "lon"
-  call f%x%attributie("long_name", x_long_name)
+  call f%x%attribute("long_name", x_long_name)
   f%x = lon
 
   f%y%name = "lat"
-  call f%y%attributie("long_name", y_long_name)
+  call f%y%attribute("long_name", y_long_name)
   f%y = lat
 
-  call f%global("auther", auther)
+  call f%global("author", author)
 
   TMP%name = "TMP"
-  call TMP%attribute("unit", unit)
+  call TMP%attribute("units", units)
   TMP = data
 
   call f%add_variable(TMP)
   
   call f%read()
 
-  print*, lon
-  print*, x_long_name
-  print*, lat
-  print*, y_long_name
-  print*, auther
-  print*, TMP
-  print*, unit
+  print*, "x_long_name:  ", x_long_name
+  print*, "y_long_name:  ", y_long_name
+  print*, "author     :  ", author
+  print*, "units      :  ", units
+  print*, "lon        :  ", lon
+  print*, "lat        :  ", lat
+  print*, "data       :  ", data
 
 end program read_demo

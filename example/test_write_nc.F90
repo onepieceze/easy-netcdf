@@ -3,7 +3,7 @@ program write_demo
   use easy_netcdf
 
   type(netcdf_type)   :: f
-  type(variable_type) :: TMP  
+  type(variable_type) :: TMP 
 
   call f%add_file("./test.nc", "w")
 
@@ -21,11 +21,12 @@ program write_demo
 
   TMP%name = "TMP"
   TMP%xtype = int
-  call TMP%attribute("unit", "k")
+  call TMP%attribute("units", "K")
 
-  TMP = reshape([26, 27, 28, 27], [2.2])
+  TMP = reshape([26, 27, 28, 27], [2, 2])
 
   call f%add_variable(variable=TMP)
+
 
   call f%write()
 

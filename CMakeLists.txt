@@ -33,13 +33,13 @@ set (sources
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/example")
 
 add_library (easy_netcdf SHARED ${sources})
-
 target_link_libraries (easy_netcdf fortran_container fortran_datetime netcdff)
 
 add_executable (read_test example/test_read_nc.F90)
-target_link_libraries (read_test easy_netcdf)
+target_link_libraries (read_test easy_netcdf netcdf netcdff)
 
 add_executable (write_test example/test_write_nc.F90)
-target_link_libraries (write_test easy_netcdf)
+target_link_libraries (write_test easy_netcdf netcdff)

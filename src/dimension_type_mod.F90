@@ -19,22 +19,11 @@ module dimension_type_mod
     procedure                           :: attribute => set_dimension_attribute
     procedure                           :: get_attribute => get_dimension_attribute
     procedure             , private     :: set_dimension_value
-    !procedure            , private     :: set_dimension_value_short
-    !procedure            , private     :: set_dimension_value_int
-    !procedure            , private     :: set_dimension_value_long
-    !procedure            , private     :: set_dimension_value_float
-    !procedure            , private     :: set_dimension_value_double
-    generic                             :: assignment(=) => &
-                                           set_dimension_value
-                                          !set_dimension_value_short, &
-                                          !set_dimension_value_int,   &
-                                          !set_dimension_value_long,  &
-                                          !set_dimension_value_float, &
-                                          !set_dimension_value_double
-    procedure                           :: get_value => get_dimension_value
-    procedure                           :: set_varid => set_dimension_varid
-    procedure                           :: get_varid => get_dimension_varid
-    procedure                           :: length    => get_dimension_length                                  
+    generic                             :: assignment(=) => set_dimension_value
+    procedure                           :: get_value     => get_dimension_value
+    procedure                           :: set_varid     => set_dimension_varid
+    procedure                           :: get_varid     => get_dimension_varid
+    procedure                           :: length        => get_dimension_length                                  
   end type dimension_type
 
 contains
@@ -47,7 +36,7 @@ contains
 
     if (.not. associated(this%dimension_attribute)) allocate(this%dimension_attribute)
 
-    call this%dimension_attribute%append(key, value)
+    call this%dimension_attribute%append_ptr(key, value)
 
   end subroutine set_dimension_attribute
 
@@ -153,7 +142,7 @@ contains
   end function get_dimension_varid
 
 
-  subroutine get_dimension_length(this) result(res)
+  function get_dimension_length(this) result(res)
 
     class(dimension_type), intent(in) :: this
     integer                           :: res
@@ -162,7 +151,7 @@ contains
 
     res = this%dimension_length
 
-  end subroutine get_dimension_length
+  end function get_dimension_length
 
 
 end module dimension_type_mod

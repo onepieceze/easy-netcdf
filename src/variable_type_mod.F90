@@ -60,7 +60,7 @@ contains
 
     if (.not. associated(this%variable_attribute)) allocate(this%variable_attribute)
 
-    call this%variable_attribute%append(key, value)
+    call this%variable_attribute%append_ptr(key, value)
 
   end subroutine set_variable_attribute
 
