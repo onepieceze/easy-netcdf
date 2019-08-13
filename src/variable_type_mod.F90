@@ -34,8 +34,8 @@ contains
 
   subroutine set_variable_id(this, varid)
 
-    type(variable_type), intent(inout) :: this
-    integer            , intent(in)    :: varid
+    class(variable_type), intent(inout) :: this
+    integer             , intent(in)    :: varid
 
     this%variable_id = varid
 
@@ -44,7 +44,7 @@ contains
 
   function get_variable_id(this) result(res)
 
-    type(variable_type), intent(in)  :: this
+    class(variable_type), intent(in) :: this
     integer                          :: res
 
     res = this%variable_id
@@ -54,9 +54,9 @@ contains
 
   subroutine set_variable_attribute(this, key, value)
 
-    type(variable_type), intent(inout) :: this
-    character(*)       , intent(in)    :: key
-    class(*)           , intent(in)    :: value
+    class(variable_type), intent(inout) :: this
+    character(*)        , intent(in)    :: key
+    class(*)            , intent(in)    :: value
 
     if (.not. associated(this%variable_attribute)) allocate(this%variable_attribute)
 
@@ -67,7 +67,7 @@ contains
 
   function get_variable_attribute(this) result(res)
 
-    type(variable_type)   , intent(in) :: this
+    class(variable_type)  , intent(in) :: this
     type(linked_list_type), pointer    :: res
 
     res => this%variable_attribute
@@ -77,8 +77,8 @@ contains
 
   subroutine set_variable_value_2d(this, value)
 
-    type(variable_type), intent(inout) :: this
-    class(*)           , intent(in)    :: value(:, :)
+    class(variable_type)        , intent(inout) :: this
+    class(*)            , target, intent(in)    :: value(:, :)
 
     this%value_2d => value
 
@@ -87,8 +87,8 @@ contains
 
   subroutine set_variable_value_3d(this, value)
 
-    type(variable_type), intent(inout) :: this
-    class(*)           , intent(in)    :: value(:, :, :)
+    class(variable_type)         , intent(inout) :: this
+    class(*)            , pointer, intent(in)    :: value(:, :, :)
 
     this%value_3d => value
 
@@ -97,8 +97,8 @@ contains
 
   subroutine set_variable_value_4d(this, value)
 
-    type(variable_type), intent(inout) :: this
-    class(*)           , intent(in)    :: value(:, :, :, :)
+    class(variable_type)         , intent(inout) :: this
+    class(*)            , pointer, intent(in)    :: value(:, :, :, :)
 
     this%value_4d => value
 

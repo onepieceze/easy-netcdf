@@ -12,7 +12,7 @@ module dimension_type_mod
     character(:)          , allocatable :: name
     integer                             :: xtype = -99999
     type(linked_list_type), pointer     :: dimension_attribute => null()
-    class(*) , pointer    , private     :: dimension_value(:)  => null()
+    class(*)              , pointer     :: value(:)            => null()
     integer               , private     :: dimension_varid
   contains
     procedure                           :: attribute => set_dimension_attribute
@@ -33,7 +33,6 @@ module dimension_type_mod
     procedure                           :: get_value => get_dimension_value
     procedure                           :: set_varid => set_dimension_varid
     procedure                           :: get_varid => get_dimension_varid
-    procedure
                                       
   end type dimension_type
 
@@ -54,7 +53,7 @@ contains
 
   function get_dimension_attribute(this) result(res)
 
-    type(dimension_type)  , intent(inout) :: this
+    class(dimension_type) , intent(inout) :: this
     type(linked_list_type), pointer       :: res
 
     res => this%dimension_attribute
@@ -67,7 +66,7 @@ contains
     class(dimension_type)        , intent(inout) :: this
     class(*)             , target, intent(in)    :: value(:)
 
-    this%dimension_value => value
+    this%value => value
 
   end subroutine set_dimension_value
 
@@ -124,28 +123,28 @@ contains
 
   function get_dimension_value(this) result(res)
 
-    class(dimension_type), intent(in)  :: this
-    class(*), pointer    , intent(out) :: res
+    class(dimension_type), intent(in) :: this
+    class(*), pointer                 :: res(:)
     
-    res => this%dimension_value
+    res => this%value
 
   end function get_dimension_value
 
 
   subroutine set_dimension_varid(this, varid)
 
-    type(dimension_type), intent(inout) :: this
-    integer             , intent(in)    :: varid
+    class(dimension_type), intent(inout) :: this
+    integer              , intent(in)    :: varid
 
     this%dimension_varid = varid
 
-  subroutine set_dimension_varid
+  end subroutine set_dimension_varid
 
 
   function get_dimension_varid(this) result(res)
 
-    class(dimension_type), intent(in)  :: this
-    integer              , intent(out) :: res
+    class(dimension_type), intent(in) :: this
+    integer                           :: res
 
     res = this%dimension_varid
 

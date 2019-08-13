@@ -3,6 +3,7 @@ module netcdf_i_mod
   use netcdf
   use linked_list_mod
   use netcdf_tool_mod
+  use variable_type_mod
 
   implicit none
 
@@ -16,9 +17,9 @@ contains
   
   subroutine netcdf_read_coordinate(ncid, varid, data)
   
-    integer ,          intent(in)    :: ncid
-    integer ,          intent(in)    :: varid
-    class(*), pointer, intent(inout) :: data(:)
+    integer ,          intent(in) :: ncid
+    integer ,          intent(in) :: varid
+    class(*), pointer, intent(in) :: data(:)
 
     select type (data)
     type is (integer(2))
@@ -38,12 +39,12 @@ contains
 
   subroutine netcdf_read_attribute(ncid, varid, attribute)
 
-    integer                             , intent(in)    :: ncid
-    integer                             , intent(in)    :: varid
-    type(linked_list_type)     , pointer, intent(inout) :: attribute
+    integer                             , intent(in) :: ncid
+    integer                             , intent(in) :: varid
+    type(linked_list_type)     , pointer, intent(in) :: attribute
 
-    type(linked_list_item_type), pointer                :: item
-    integer                                             :: i
+    type(linked_list_item_type), pointer             :: item
+    integer                                          :: i
 
     do i=1, attribute%size
       item => attribute%value_at(i)
@@ -68,8 +69,8 @@ contains
 
   subroutine netcdf_read_variable(ncid, variable_list)
 
-    integer                             , intent(in) :: ncid
-    type(linked_list_type)     , pointer, intent(in) :: variable_list
+    integer                        , intent(in) :: ncid
+    type(linked_list_type), pointer, intent(in) :: variable_list
 
     integer                                          :: i
     integer                                          :: varid
@@ -121,8 +122,6 @@ contains
           end select
         end if
         call netcdf_read_attribute(ncid, varid, value%get_attribute())
-      type default
-        stop "Error: variable type not match."
       end select
     end do
 

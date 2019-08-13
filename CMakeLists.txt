@@ -38,8 +38,8 @@ add_library (easy_netcdf SHARED ${sources})
 
 target_link_libraries (easy_netcdf fortran_container fortran_datetime netcdff)
 
-add_executable (read_test src/test_open_nc.F90)
+add_executable (read_test example/test_read_nc.F90)
 target_link_libraries (read_test easy_netcdf)
 
-add_executable (write_test src/test_cteate_nc.F90)
+add_executable (write_test example/test_write_nc.F90)
 target_link_libraries (write_test easy_netcdf)
