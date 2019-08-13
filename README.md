@@ -88,7 +88,7 @@ program read_demo
 
 end program read_demo
 ```
-Results:
+Result:
 ```
  x_long_name:  longitude                     
  y_long_name:  latitude                      
