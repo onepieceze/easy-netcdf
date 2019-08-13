@@ -170,7 +170,7 @@ contains
 
     print*, "Define t dimension:"
     if (allocated(this%t%name)) then
-      call netcdf_define_coordinate(this%ncid, this%t%name, this%t%length(), this%t%xtype, t_dimid, varid)
+      call netcdf_define_coordinate(this%ncid, this%t%name, nf90_unlimited, this%t%xtype, t_dimid, varid)
       call netcdf_define_attribute(this%ncid, varid, this%t%get_attribute())
       call this%t%set_varid(varid)
       dimension_number = dimension_number + 1
