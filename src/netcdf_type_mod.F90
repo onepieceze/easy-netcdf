@@ -17,22 +17,22 @@ module netcdf_type_mod
   public :: netcdf_type
 
   type :: netcdf_type
-    integer                  , private              :: ncid
-    character(:)             , allocatable, private :: iotype
-    integer                  , allocatable, private :: dimids(:)
-    type(dimension_type)                            :: x
-    type(dimension_type)                            :: y
-    type(dimension_type)                            :: z
-    type(dimension_type)                            :: t
-    type(linked_list_type)   , pointer    , private :: global_attribute => null()
-    type(linked_list_type)   , pointer    , private :: variable_list    => null()
+    integer               , private              :: ncid
+    character(:)          , allocatable, private :: iotype
+    integer               , allocatable, private :: dimids(:)
+    type(dimension_type)                         :: x
+    type(dimension_type)                         :: y
+    type(dimension_type)                         :: z
+    type(dimension_type)                         :: t
+    type(linked_list_type), pointer    , private :: global_attribute => null()
+    type(linked_list_type), pointer    , private :: variable_list    => null()
   contains
-    procedure                                       :: add_file
-    procedure                                       :: add_variable
-    procedure                                       :: read   => read_netcdf
-    procedure                                       :: write  => write_netcdf
-    procedure                                       :: global => set_global_attribute
-    procedure                                       :: get_global_attribute
+    procedure                                    :: add_file
+    procedure                                    :: add_variable
+    procedure                                    :: read   => read_netcdf
+    procedure                                    :: write  => write_netcdf
+    procedure                                    :: global => set_global_attribute
+    procedure                                    :: get_global_attribute
   end type netcdf_type
 
 contains
@@ -128,16 +128,16 @@ contains
 
   subroutine write_netcdf(this)
 
-    class(netcdf_type)  , intent(in)   :: this
+    class(netcdf_type), intent(in) :: this
   
-    integer                            :: dimension_number
-    integer                            :: varid
-    integer                            :: x_dimid
-    integer                            :: y_dimid
-    integer                            :: z_dimid
-    integer                            :: t_dimid
-    integer              , allocatable :: dimids(:)
-    integer                            :: i
+    integer                        :: dimension_number
+    integer                        :: varid
+    integer                        :: x_dimid
+    integer                        :: y_dimid
+    integer                        :: z_dimid
+    integer                        :: t_dimid
+    integer, allocatable           :: dimids(:)
+    integer                        :: i
 
     if (this%iotype /= "w" .or. this%iotype /= "write") stop "Error: should be write model."
     
@@ -145,27 +145,32 @@ contains
 
     print*, "Define x dimension:"
     if (allocated(this%x%name)) then
-      call netcdf_define_coordinate(this%ncid, this%x, x_dimid)
+      call netcdf_define_coordinate(this%ncid, this%x%name, this%x%length(), this%x%xtype, x_dimid, varid)
+      call netcdf_define_attribute(this%ncid, varid, this%x%get_attribute)
+      call this%x%set_varid(varid)
       dimension_number = dimension_number + 1
     end if
 
     print*, "Define y dimension:"
     if (allocated(this%y%name)) then
-      call netcdf_define_coordinate(this%ncid, this%y, y_dimid)
+      call netcdf_define_coordinate(this%ncid, this%y%name, this%y%length(), this%y%xtype, y_dimid, varid)
+      call netcdf_define_attribute(this%ncid, varid, this%y%get_attribute)
       call this%y%set_varid(varid)
       dimension_number = dimension_number + 1
     end if
 
     print*, "Define z dimension:"
     if (allocated(this%z%name)) then
-      call netcdf_define_coordinate(this%ncid, this%z, z_dimid)
+      call netcdf_define_coordinate(this%ncid, this%z%name, this%z%length(), this%z%xtype, z_dimid, varid)
+      call netcdf_define_attribute(this%ncid, varid, this%z%get_attribute)
       call this%z%set_varid(varid)
       dimension_number = dimension_number + 1
     end if
 
     print*, "Define t dimension:"
     if (allocated(this%t%name)) then
-      call netcdf_define_coordinate(this%ncid, this%t, t_dimid)
+      call netcdf_define_coordinate(this%ncid, this%t%name, this%t%length(), this%t%xtype, t_dimid, varid)
+      call netcdf_define_attribute(this%ncid, varid, this%t%get_attribute)
       call this%t%set_varid(varid)
       dimension_number = dimension_number + 1
     end if
@@ -185,14 +190,7 @@ contains
     end select
 
     print*, "Define variable:"
-    do i=1, this%variable_list%size
-      select type (value => this%variable_list%value_at(i))
-      type is (variable_type)
-        call netcdf_define_variable(this%ncid, value, dimids)
-      type default
-        stop "Error: variable type not match."
-      end select
-    end do
+    call netcdf_define_variable(this%ncid, this%variable_list, dimids)
 
     deallocate(dimids)
 
@@ -222,6 +220,8 @@ contains
 
     print*, "Write variable:"
     call netcdf_write_variable(this%ncid, this%variable_list)
+
+    call netcdf_define_attribute(this$ncid, nf90_global, this%get_global_attribute())
 
     call check(nf90_close(this%ncid))
 

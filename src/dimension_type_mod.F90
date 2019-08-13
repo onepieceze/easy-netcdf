@@ -14,6 +14,7 @@ module dimension_type_mod
     type(linked_list_type), pointer     :: dimension_attribute => null()
     class(*)              , pointer     :: value(:)            => null()
     integer               , private     :: dimension_varid
+    integer               , private     :: dimension_length
   contains
     procedure                           :: attribute => set_dimension_attribute
     procedure                           :: get_attribute => get_dimension_attribute
@@ -33,7 +34,7 @@ module dimension_type_mod
     procedure                           :: get_value => get_dimension_value
     procedure                           :: set_varid => set_dimension_varid
     procedure                           :: get_varid => get_dimension_varid
-                                      
+    procedure                           :: length    => get_dimension_length                                  
   end type dimension_type
 
 contains
@@ -66,6 +67,7 @@ contains
     class(dimension_type)        , intent(inout) :: this
     class(*)             , target, intent(in)    :: value(:)
 
+    this%dimension_length = size(value)
     this%value => value
 
   end subroutine set_dimension_value
@@ -149,5 +151,18 @@ contains
     res = this%dimension_varid
 
   end function get_dimension_varid
+
+
+  subroutine get_dimension_length(this) result(res)
+
+    class(dimension_type), intent(in) :: this
+    integer                           :: res
+
+    if (.not. associated(this%value)) stop "Error: dimension value not allocated, length unknown."
+
+    res = this%dimension_length
+
+  end subroutine get_dimension_length
+
 
 end module dimension_type_mod

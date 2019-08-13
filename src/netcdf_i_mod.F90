@@ -72,8 +72,8 @@ contains
     integer                        , intent(in) :: ncid
     type(linked_list_type), pointer, intent(in) :: variable_list
 
-    integer                                          :: i
-    integer                                          :: varid
+    integer                                     :: i
+    integer                                     :: varid
 
     do i=1, variable_list%size
       select type (value => variable_list%value_at(i))
