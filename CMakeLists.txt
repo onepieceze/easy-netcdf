@@ -24,7 +24,11 @@ endif ()
 set (sources
   src/netcdf_param_mod.F90
   src/netcdf_tool_mod.F90
-  src/netcdf_io_mod.F90
+  src/dimension_type_mod.F90
+  src/variable_type_mod.F90
+  src/netcdf_i_mod.F90
+  src/netcdf_o_mod.F90
+  src/netcdf_type_mod.F90
   src/easy_netcdf.F90
 )
 
@@ -32,4 +36,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 add_library (easy_netcdf SHARED ${sources})
 
-target_link_libraries(easy_netcdf fortran_container fortran_datetime netcdff)
+target_link_libraries (easy_netcdf fortran_container fortran_datetime netcdff)
+
+add_executable (read_test src/test_open_nc.F90)
+target_link_libraries (read_test easy_netcdf)
+
+add_executable (write_test src/test_cteate_nc.F90)
+target_link_libraries (write_test easy_netcdf)
