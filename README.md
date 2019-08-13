@@ -4,6 +4,9 @@ This repository is an simple Fortran package to using netcdf library.
 Using two open sources code from : https://github.com/dongli/fortran-container.git
                                  & https://github.com/dongli/fortran-datetime.git
 
+# Denpendencies
+Unidata netcdf-fortran library
+
 # Installation
 A CMake-Setup is provided.
 
