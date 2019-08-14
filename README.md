@@ -26,7 +26,7 @@ Unidata netcdf-fortran library
 ## Installation
 A CMake-Setup is provided.
 
-# Example
+## Example
 ### Writing:
 ```
 program write_demo
