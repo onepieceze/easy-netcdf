@@ -1,6 +1,6 @@
 <a name="top"></a>
 # [easy-netcdf](https://github.com/onepieceze/easy-netcdf) 
-[Fortran] OPP interface to the netcdf [fortran library].
+Fortran OOP Interface to the netcdf [fortran library](https://github.com/Unidata/netcdf-fortran).
 
 ## Content
 
