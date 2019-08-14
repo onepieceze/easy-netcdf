@@ -18,8 +18,7 @@ Fortran OOP Interface to the netcdf [fortran library](https://github.com/Unidata
 ## Overview
 This repository is an simple Fortran package to using netcdf library.
 
-Using two open sources code from : https://github.com/dongli/fortran-container.git
-                                 & https://github.com/dongli/fortran-datetime.git
+Using two open sources code from : [Fortran Date Time Library](https://github.com/dongli/fortran-container.git) & [fortran-container](https://github.com/dongli/fortran-datetime.git)
 
 ## Prerequisites:
 Unidata netcdf-fortran library
@@ -29,7 +28,7 @@ A CMake-Setup is provided.
 
 ## Example
 ### Writing:
-```
+```Fortran
 program write_demo
 
   use easy_netcdf
@@ -64,7 +63,7 @@ program write_demo
 end program write_demo
 ```
 ### Reading:
-```
+```Fortran
 program read_demo
 
   use easy_netcdf
