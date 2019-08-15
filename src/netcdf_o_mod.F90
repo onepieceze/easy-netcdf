@@ -1,6 +1,7 @@
 module netcdf_o_mod
 
   use netcdf
+  use netcdf_param_mod
   use linked_list_mod
   use netcdf_tool_mod
   use variable_type_mod
@@ -37,18 +38,18 @@ contains
   end subroutine netcdf_read_coordinate
 
 
-  subroutine netcdf_read_attribute(ncid, varid, attribute)
+  subroutine netcdf_read_attribute(ncid, varid, attributes)
 
     integer                             , intent(in) :: ncid
     integer                             , intent(in) :: varid
-    type(linked_list_type)     , pointer, intent(in) :: attribute
+    type(linked_list_type)     , pointer, intent(in) :: attributes
 
     type(linked_list_item_type), pointer             :: item
     integer                                          :: i
     class(*)                   , pointer             :: value
 
-    do i=1, attribute%size
-      item => attribute%item_at(i)
+    do i=1, attributes%size
+      item => attributes%item_at(i)
       value => item%value
       select type (value)
       type is (character(*))
@@ -63,16 +64,29 @@ contains
         call check(nf90_get_att(ncid, varid, item%key, value))
       type is (real(8))
         call check(nf90_get_att(ncid, varid, item%key, value))
+        type is (array_2d_type)
+        select type (array => value%array)
+        type is (integer(2))
+          call check(nf90_get_att(ncid, varid, item%key, array))
+        type is (integer(4))
+          call check(nf90_get_att(ncid, varid, item%key, array))
+        type is (integer(8))
+          call check(nf90_get_att(ncid, varid, item%key, array))
+        type is (real(4))
+          call check(nf90_get_att(ncid, varid, item%key, array))
+        type is (real(8))
+          call check(nf90_get_att(ncid, varid, item%key, array))
+        end select
       end select
     end do
 
   end subroutine netcdf_read_attribute
 
 
-  subroutine netcdf_read_variable(ncid, variable_list)
+  subroutine netcdf_read_variable(ncid, variables)
 
     integer                        , intent(in) :: ncid
-    type(linked_list_type), pointer, intent(in) :: variable_list
+    type(linked_list_type), pointer, intent(in) :: variables
 
     integer                                     :: i
     type(variable_type)   , pointer             :: variable
@@ -81,8 +95,8 @@ contains
     class(*)              , pointer             :: value_3d(:, :, :)
     class(*)              , pointer             :: value_4d(:, :, :, :)
 
-    do i=1, variable_list%size
-      variable => variable_list%value_at(i)
+    do i=1, variables%size
+      variable => variables%value_at(i)
       call check(nf90_inq_varid(ncid, variable%name, varid))
       if (associated(variable%value_2d)) then
         value_2d => variable%value_2d
@@ -129,7 +143,7 @@ contains
           call check(nf90_get_var(ncid, varid, value_4d))
         end select
       end if
-      call netcdf_read_attribute(ncid, varid, variable%get_attribute())
+      call netcdf_read_attribute(ncid, varid, variable%get_attributes())
     end do
 
   end subroutine netcdf_read_variable

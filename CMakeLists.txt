@@ -22,6 +22,7 @@ if (DEFINED ENV{NETCDF_ROOT})
 endif ()
 
 set (sources
+  src/netcdf_xtype_mod.F90
   src/netcdf_param_mod.F90
   src/netcdf_tool_mod.F90
   src/dimension_type_mod.F90

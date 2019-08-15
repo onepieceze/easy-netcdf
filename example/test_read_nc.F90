@@ -7,6 +7,7 @@ program read_demo
   integer              :: lon(2)
   integer              :: lat(2)
   integer              :: data(2, 2)
+  integer              :: range(2)
   character(30)        :: x_long_name
   character(30)        :: y_long_name
   character(30)        :: units
@@ -27,6 +28,7 @@ program read_demo
 
   TMP%name = "TMP"
   call TMP%attribute("units", units)
+  call TMP%attribute("range", range)
   TMP = data
 
   call f%add_variable(TMP)
@@ -40,5 +42,6 @@ program read_demo
   print*, "lon        :  ", lon
   print*, "lat        :  ", lat
   print*, "data       :  ", data
+  print*, "range      :  ", range
 
 end program read_demo

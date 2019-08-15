@@ -27,6 +27,14 @@ Unidata netcdf-fortran library
 A CMake-Setup is provided.
 
 ## Example
+xtype:
+```
+int2
+int4
+int8
+real4
+real8
+```
 ### Writing:
 ```Fortran
 program write_demo
@@ -39,19 +47,19 @@ program write_demo
   call f%add_file("./test.nc", "w")
 
   f%x%name = "lon"
-  f%x%xtype = int
+  f%x%xtype = int4
   call f%x%attribute("long_name", "longitude")
   f%x = [1, 2]
 
   f%y%name = "lat"
-  f%y%xtype = int
+  f%y%xtype = int4
   call f%y%attribute("long_name", "latitude")
   f%y = [1, 2]
 
   call f%global("author", "onepieceze")
 
   TMP%name = "TMP"
-  TMP%xtype = int
+  TMP%xtype = int4
   call TMP%attribute("units", "K")
 
   TMP = reshape([26, 27, 28, 27], [2, 2])
