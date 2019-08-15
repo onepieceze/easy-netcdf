@@ -29,11 +29,7 @@ A CMake-Setup is provided.
 ## Example
 xtype:
 ```
-int2
-int4
-int8
-real4
-real8
+int2      int4      int8      real4      real8
 ```
 ### Writing:
 ```Fortran
