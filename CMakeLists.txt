@@ -25,6 +25,7 @@ set (sources
   src/netcdf_xtype_mod.F90
   src/netcdf_param_mod.F90
   src/netcdf_tool_mod.F90
+  src/base_type_mod.F90
   src/dimension_type_mod.F90
   src/variable_type_mod.F90
   src/netcdf_i_mod.F90

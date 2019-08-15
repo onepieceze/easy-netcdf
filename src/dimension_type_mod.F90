@@ -1,5 +1,6 @@
 module dimension_type_mod
 
+  use base_type_mod
   use netcdf_param_mod
   use linked_list_mod
 
@@ -9,20 +10,13 @@ module dimension_type_mod
 
   public :: dimension_type
 
-  type :: dimension_type
+  type, extends(base_type) :: dimension_type
     character(:)          , allocatable :: name
     integer                             :: xtype = -99999
-    type(linked_list_type), pointer     :: attributes => null()
     class(*)              , pointer     :: value(:)   => null()
     integer               , private     :: dims_varid
     integer               , private     :: dims_length
   contains
-    procedure             , private     :: set_attribute
-    procedure             , private     :: set_attribute_2d
-    generic                             :: attribute =>   &
-                                           set_attribute, &
-                                           set_attribute_2d
-    procedure                           :: get_attributes
     procedure             , private     :: set_value
     generic                             :: assignment(=) => set_value
     procedure                           :: get_value
@@ -32,46 +26,6 @@ module dimension_type_mod
   end type dimension_type
 
 contains
-
-  subroutine set_attribute(this, key, value)
-
-    class(dimension_type), intent(inout) :: this
-    character(*)         , intent(in)    :: key
-    class(*)             , intent(in)    :: value
-
-    if (.not. associated(this%attributes)) allocate(this%attributes)
-
-    call this%attributes%append_ptr(key, value)
-
-  end subroutine set_attribute
-
-
-  subroutine set_attribute_2d(this, key, value)
-
-    class(dimension_type), intent(inout) :: this
-    character(*)         , intent(in)    :: key
-    class(*)    , target , intent(in)    :: value(:)
-
-    type(array_2d_type)                  :: array_2d
-
-    if (.not. associated(this%attributes)) allocate(this%attributes)
-
-    array_2d%array => value
-
-    call this%attributes%append_ptr(key, array_2d)
-
-  end subroutine
-
-
-  function get_attributes(this) result(res)
-
-    class(dimension_type) , intent(inout) :: this
-    type(linked_list_type), pointer       :: res
-
-    res => this%attributes
-
-  end function get_attributes
-
 
   subroutine set_value(this, value)
 
@@ -123,6 +77,5 @@ contains
     res = this%dims_length
 
   end function get_length
-
 
 end module dimension_type_mod

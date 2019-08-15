@@ -3,13 +3,14 @@ module netcdf_type_mod
   !! The io module to open or create netcdf file. 
 
   use netcdf
-  use netcdf_param_mod
-  use linked_list_mod
-  use netcdf_tool_mod
-  use dimension_type_mod
-  use variable_type_mod
   use netcdf_i_mod
   use netcdf_o_mod
+  use base_type_mod
+  use linked_list_mod
+  use netcdf_tool_mod
+  use netcdf_param_mod
+  use variable_type_mod
+  use dimension_type_mod
 
   implicit none
 
@@ -17,7 +18,7 @@ module netcdf_type_mod
 
   public :: netcdf_type
 
-  type :: netcdf_type
+  type, extends(base_type) :: netcdf_type
     integer               , private              :: ncid
     character(:)          , allocatable, private :: iotype
     integer               , allocatable, private :: dimids(:)
@@ -25,19 +26,12 @@ module netcdf_type_mod
     type(dimension_type)                         :: y
     type(dimension_type)                         :: z
     type(dimension_type)                         :: t
-    type(linked_list_type), pointer    , private :: attributes => null()
-    type(linked_list_type), pointer    , private :: variables    => null()
+    type(linked_list_type), pointer    , private :: variables  => null()
   contains
     procedure                                    :: add_file
     procedure                                    :: add_variable
     procedure                                    :: read   => read_netcdf
     procedure                                    :: write  => write_netcdf
-    procedure                          , private :: set_attribute
-    procedure                          , private :: set_attribute_2d
-    generic                                      :: global =>      &
-                                                    set_attribute, &
-                                                    set_attribute_2d
-    procedure                                    :: get_attributes
   end type netcdf_type
 
 contains
@@ -128,6 +122,8 @@ contains
     call netcdf_read_attribute(this%ncid, nf90_global, this%get_attributes())
 
     call check(nf90_close(this%ncid))
+
+    print*, "   --- finished reading ---   "
 
   end subroutine read_netcdf
 
@@ -230,48 +226,10 @@ contains
 
     call check(nf90_close(this%ncid))
 
+    print*, "   --- finished writing ---   "
+
   end subroutine write_netcdf
-
-
-  subroutine set_attribute(this, key, value)
-
-    class(netcdf_type), intent(inout) :: this
-    character(*)      , intent(in)    :: key
-    class(*)          , intent(in)    :: value
-
-    if (.not. associated(this%attributes)) allocate(this%attributes)
-
-    call this%attributes%append_ptr(key, value)
-
-  end subroutine set_attribute
-
-
-  subroutine set_attribute_2d(this, key, value)
-
-    class(netcdf_type), intent(inout) :: this
-    character(*)      , intent(in)    :: key
-    class(*) , target , intent(in)    :: value(:)
-
-    type(array_2d_type)               :: array_2d
-
-    if (.not. associated(this%attributes)) allocate(this%attributes)
-
-    array_2d%array => value
-
-    call this%attributes%append_ptr(key, array_2d)
-
-  end subroutine
-
-
-  function get_attributes(this) result(res)
-
-    class(netcdf_type)    , intent(in) :: this
-    type(linked_list_type), pointer    :: res
-
-    res => this%attributes
- 
-  end function get_attributes
-
+  
 
 end module netcdf_type_mod
 

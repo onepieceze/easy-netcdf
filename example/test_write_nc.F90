@@ -17,7 +17,7 @@ program write_demo
   call f%y%attribute("long_name", "latitude")
   f%y = [1, 2]
 
-  call f%global("author", "onepieceze")
+  call f%attribute("author", "onepieceze")
 
   TMP%name = "TMP"
   TMP%xtype = int4

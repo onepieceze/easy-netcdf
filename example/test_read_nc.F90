@@ -24,7 +24,7 @@ program read_demo
   call f%y%attribute("long_name", y_long_name)
   f%y = lat
 
-  call f%global("author", author)
+  call f%attribute("author", author)
 
   TMP%name = "TMP"
   call TMP%attribute("units", units)
