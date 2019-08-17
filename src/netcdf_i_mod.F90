@@ -3,7 +3,6 @@ module netcdf_i_mod
   !!  ------   create netcdf file method   ------  !!  
 
   use netcdf
-  use datetime
   use netcdf_param_mod
   use netcdf_tool_mod
   use linked_list_mod
@@ -44,14 +43,7 @@ contains
     type(linked_list_type)     , pointer, intent(in) :: attributes 
 
     type(linked_list_item_type), pointer             :: item
-    type(datetime_type)                              :: datetime
     integer                                          :: i
-    !class(*)                   , pointer             :: value
-
-    if (varid == nf90_global) then
-      call datetime%init()
-      call check(nf90_put_att(ncid, varid, "creation_date", trim(datetime%isoformat())))
-    end if
 
     do i=1, attributes%size
       item => attributes%item_at(i)

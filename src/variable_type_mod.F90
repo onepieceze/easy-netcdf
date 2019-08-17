@@ -64,7 +64,7 @@ contains
   subroutine set_value_3d(this, value)
 
     class(variable_type)         , intent(inout) :: this
-    class(*)            , pointer, intent(in)    :: value(:, :, :)
+    class(*)            , target , intent(in)    :: value(:, :, :)
 
     this%value_3d => value
 
@@ -74,7 +74,7 @@ contains
   subroutine set_value_4d(this, value)
 
     class(variable_type)         , intent(inout) :: this
-    class(*)            , pointer, intent(in)    :: value(:, :, :, :)
+    class(*)            , target , intent(in)    :: value(:, :, :, :)
 
     this%value_4d => value
 
