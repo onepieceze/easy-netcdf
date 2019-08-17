@@ -145,32 +145,32 @@ contains
     
     dims_number = 0
 
-    print*, "Define x dimension:"
     if (allocated(this%x%name)) then
+      print*, "Define x dimension:"
       call netcdf_define_coordinate(this%ncid, this%x%name, this%x%length(), this%x%xtype, x_dimid, varid)
       call netcdf_define_attribute(this%ncid, varid, this%x%get_attributes())
       call this%x%set_varid(varid)
       dims_number = dims_number + 1
     end if
 
-    print*, "Define y dimension:"
     if (allocated(this%y%name)) then
+      print*, "Define y dimension:"
       call netcdf_define_coordinate(this%ncid, this%y%name, this%y%length(), this%y%xtype, y_dimid, varid)
       call netcdf_define_attribute(this%ncid, varid, this%y%get_attributes())
       call this%y%set_varid(varid)
       dims_number = dims_number + 1
     end if
 
-    print*, "Define z dimension:"
     if (allocated(this%z%name)) then
+      print*, "Define z dimension:"
       call netcdf_define_coordinate(this%ncid, this%z%name, this%z%length(), this%z%xtype, z_dimid, varid)
       call netcdf_define_attribute(this%ncid, varid, this%z%get_attributes())
       call this%z%set_varid(varid)
       dims_number = dims_number + 1
     end if
 
-    print*, "Define t dimension:"
     if (allocated(this%t%name)) then
+      print*, "Define t dimension:"
       call netcdf_define_coordinate(this%ncid, this%t%name, nf90_unlimited, this%t%xtype, t_dimid, varid)
       call netcdf_define_attribute(this%ncid, varid, this%t%get_attributes())
       call this%t%set_varid(varid)
@@ -199,25 +199,27 @@ contains
     print*, "Define global attribute"
     call netcdf_define_attribute(this%ncid, nf90_global, this%get_attributes())
 
+    print*, "hello"
+
     call check(nf90_enddef(this%ncid))
 
-    print*, "Write x dimension:"
     if (allocated(this%x%name)) then
+      print*, "Write x dimension:"
       call netcdf_write_coordinate(this%ncid, this%x)
     end if
 
-    print*, "Write y dimension:"
     if (allocated(this%y%name)) then
+      print*, "Write y dimension:"
       call netcdf_write_coordinate(this%ncid, this%y)
     end if
 
-    print*, "Write z dimension:"
     if (allocated(this%z%name)) then
+      print*, "Write z dimension:"
       call netcdf_write_coordinate(this%ncid, this%z)
     end if
 
-    print*, "Write t dimension:"
     if (allocated(this%t%name)) then
+      print*, "Write t dimension:"
       call netcdf_write_coordinate(this%ncid, this%t)
     end if
 

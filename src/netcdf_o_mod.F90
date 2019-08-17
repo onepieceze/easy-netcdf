@@ -48,6 +48,8 @@ contains
     integer                                          :: i
     class(*)                   , pointer             :: value
 
+    if (.not. associated(attributes)) return
+
     do i=1, attributes%size
       item => attributes%item_at(i)
       value => item%value

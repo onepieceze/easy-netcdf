@@ -45,6 +45,8 @@ contains
     type(linked_list_item_type), pointer             :: item
     integer                                          :: i
 
+    if (.not. associated(attributes)) return
+
     do i=1, attributes%size
       item => attributes%item_at(i)
       select type (value => item%value)
