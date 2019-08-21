@@ -32,37 +32,42 @@ xtype:
 int2      int4      int8      real4      real8
 ```
 ### Writing:
+Setting unlimited dimension: time%unlimited = .true.
 ```Fortran
 program write_demo
 
   use easy_netcdf
 
-  type(netcdf_type)   :: f
-  type(variable_type) :: TMP
+  type(netcdf_type)    :: F
+  type(variable_type)  :: TMP
+  type(dimension_type) :: LON
+  type(dimension_type) :: LAT
 
-  call f%add_file("./test.nc", "w")
+  call F%add_file("./test.nc", "w")
 
-  f%x%name = "lon"
-  f%x%xtype = int4
-  call f%x%attribute("long_name", "longitude")
-  f%x = [1, 2]
+  LON%name = "lon"
+  LON%xtype = int4
+  call LON%attribute("long_name", "longitude")
+  LON = [1, 2]
 
-  f%y%name = "lat"
-  f%y%xtype = int4
-  call f%y%attribute("long_name", "latitude")
-  f%y = [1, 2]
-
-  call f%attribute("author", "onepieceze")
+  LAT%name = "lat"
+  LAT%xtype = int4
+  call LAT%attribute("long_name", "latitude")
+  LAT = [1, 2]
 
   TMP%name = "TMP"
   TMP%xtype = int4
+  call TMP%dimension([LON, LAT])
   call TMP%attribute("units", "K")
-
+  call TMP%attribute("range", [-100, 100])
   TMP = reshape([26, 27, 28, 27], [2, 2])
 
-  call f%add_variable(variable=TMP)
+  call F%add_variable(variable=TMP)
+  call F%add_variable(variable=LON)
+  call F%add_variable(variable=LAT)
+  call F%attribute("author", "onepieceze")
 
-  call f%write()
+  call F%write()
 
 end program write_demo
 ```
@@ -72,43 +77,52 @@ program read_demo
 
   use easy_netcdf
 
-  type(netcdf_type)    :: f
+  type(netcdf_type)    :: F
   type(variable_type)  :: TMP
-  integer              :: lon(2)
-  integer              :: lat(2)
-  integer              :: data(2, 2)
-  character(30)        :: x_long_name
-  character(30)        :: y_long_name
+  type(dimension_type) :: LON
+  type(dimension_type) :: LAT
+  integer              :: LON_value(2)
+  integer              :: LAT_value(2)
+  integer              :: TMP_value(2, 2)
+  integer              :: range(2)
+  character(30)        :: lon_long_name
+  character(30)        :: lat_long_name
   character(30)        :: units
   character(30)        :: author
 
+
   call f%add_file("./test.nc", "r")
 
-  f%x%name = "lon"
-  call f%x%attribute("long_name", x_long_name)
-  f%x = lon
+  LON%name = "lon"
+  call LON%attribute("long_name", lon_long_name)
+  LON = LON_value
 
-  f%y%name = "lat"
-  call f%y%attribute("long_name", y_long_name)
-  f%y = lat
+  LAT%name = "lat"
+  call LAT%attribute("long_name", lat_long_name)
+  LAT = LAT_value
 
-  call f%attribute("author", author)
+  call F%attribute("author", author)
 
   TMP%name = "TMP"
+  call TMP%dimension([LON, LAT])
   call TMP%attribute("units", units)
-  TMP = data
+  call TMP%attribute("range", range)
+  TMP = TMP_value
 
-  call f%add_variable(TMP)
+  call F%add_variable(variable=TMP)
+  call F%add_variable(variable=LON)
+  call F%add_variable(variable=LAT)
+  
+  call F%read()
 
-  call f%read()
-
-  print*, "x_long_name:  ", x_long_name
-  print*, "y_long_name:  ", y_long_name
+  print*, "x_long_name:  ", lon_long_name
+  print*, "y_long_name:  ", lat_long_name
   print*, "author     :  ", author
   print*, "units      :  ", units
-  print*, "lon        :  ", lon
-  print*, "lat        :  ", lat
-  print*, "data       :  ", data
+  print*, "lon        :  ", LON_value
+  print*, "lat        :  ", LAT_value
+  print*, "data       :  ", TMP_value
+  print*, "range      :  ", range
 
 end program read_demo
 ```

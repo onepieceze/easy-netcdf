@@ -13,16 +13,20 @@ module dimension_type_mod
   type, extends(base_type) :: dimension_type
     character(:)          , allocatable :: name
     integer                             :: xtype = -99999
+    logical                             :: unlimited = .false.
     class(*)              , pointer     :: value(:)   => null()
-    integer               , private     :: dims_varid
-    integer               , private     :: dims_length
+    integer               , private     :: dimid
+    integer               , private     :: varid
+    integer               , private     :: length
   contains
     procedure             , private     :: set_value
     generic                             :: assignment(=) => set_value
     procedure                           :: get_value
     procedure                           :: set_varid
-    procedure                           :: get_varid 
-    procedure                           :: length => get_length                                  
+    procedure                           :: get_varid
+    procedure                           :: set_dimid
+    procedure                           :: get_dimid
+    procedure                           :: get_length                                  
   end type dimension_type
 
 contains
@@ -32,7 +36,7 @@ contains
     class(dimension_type)        , intent(inout) :: this
     class(*)             , target, intent(in)    :: value(:)
 
-    this%dims_length = size(value)
+    this%length = size(value)
     this%value => value
 
   end subroutine set_value
@@ -52,7 +56,7 @@ contains
     class(dimension_type), intent(inout) :: this
     integer              , intent(in)    :: varid
 
-    this%dims_varid = varid
+    this%varid = varid
 
   end subroutine set_varid
 
@@ -62,9 +66,29 @@ contains
     class(dimension_type), intent(in) :: this
     integer                           :: res
 
-    res = this%dims_varid
+    res = this%varid
 
   end function get_varid
+
+
+  subroutine set_dimid(this, dimid)
+
+    class(dimension_type), intent(inout) :: this
+    integer              , intent(in)    :: dimid
+
+    this%dimid = dimid
+
+  end subroutine set_dimid
+  
+  
+  function get_dimid(this) result(res)
+
+    class(dimension_type), intent(in) :: this
+    integer                           :: res
+
+    res = this%dimid
+
+  end function get_dimid
 
 
   function get_length(this) result(res)
@@ -74,7 +98,7 @@ contains
 
     if (.not. associated(this%value)) stop "Error: dimension value not allocated, length unknown."
 
-    res = this%dims_length
+    res = this%length
 
   end function get_length
 

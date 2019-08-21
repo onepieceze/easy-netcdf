@@ -21,17 +21,17 @@ module netcdf_type_mod
   type, extends(base_type) :: netcdf_type
     integer               , private              :: ncid
     character(:)          , allocatable, private :: iotype
-    integer               , allocatable, private :: dimids(:)
-    type(dimension_type)                         :: x
-    type(dimension_type)                         :: y
-    type(dimension_type)                         :: z
-    type(dimension_type)                         :: t
+    type(linked_list_type), pointer    , private :: dimensions => null()
     type(linked_list_type), pointer    , private :: variables  => null()
   contains
     procedure                                    :: add_file
-    procedure                                    :: add_variable
-    procedure                                    :: read   => read_netcdf
-    procedure                                    :: write  => write_netcdf
+    procedure                          , private :: add_variable1
+    procedure                          , private :: add_variable2
+    generic                                      :: add_variable => &
+                                                    add_variable1,  &
+                                                    add_variable2
+    procedure                                    :: read         => read_netcdf
+    procedure                                    :: write        => write_netcdf
   end type netcdf_type
 
 contains
@@ -58,7 +58,7 @@ contains
   end subroutine add_file
 
 
-  subroutine add_variable(this, variable)
+  subroutine add_variable1(this, variable)
 
     class(netcdf_type) , intent(inout) :: this
     type(variable_type), intent(in)    :: variable
@@ -67,168 +67,57 @@ contains
 
     call this%variables%append_ptr(variable)
 
-  end subroutine add_variable
+  end subroutine add_variable1
+
+
+  subroutine add_variable2(this, variable)
+
+    class(netcdf_type)  , intent(inout) :: this
+    type(dimension_type), intent(in)    :: variable
+
+    if (.not. associated(this%dimensions)) allocate(this%dimensions)
+
+    call this%dimensions%append_ptr(variable)
+
+  end subroutine add_variable2
 
 
   subroutine read_netcdf(this)
 
-    class(netcdf_type), intent(inout) :: this
-
-    integer                           :: dims_number
-    integer           , allocatable   :: dimids(:)
-    integer                           :: include_parents
-    integer                           :: i
-    character(30)                     :: dims_name
-    integer                           :: length
-    integer                           :: varid
+    class(netcdf_type)    , intent(inout) :: this
 
     if (this%iotype /= "r" .and. this%iotype /= "read") stop "Error: should be read model."
 
-    call check(nf90_inquire(ncid=this%ncid, ndimensions=dims_number))
+    call netcdf_read_coordinate(this%ncid, this%dimensions)
 
-    allocate(dimids(dims_number))
-
-    call check(nf90_inq_dimids(this%ncid, dims_number, dimids, include_parents))
-
-    do i=1, dims_number
-      call check(nf90_inquire_dimension(this%ncid, dimids(i), dims_name, length))
-      call check(nf90_inq_varid(this%ncid, dims_name, varid))
-      if (dims_name == this%x%name) then
-        print*, "Read x dimension:"
-        call netcdf_read_coordinate(this%ncid, varid, this%x%get_value())
-        call netcdf_read_attribute(this%ncid, varid, this%x%get_attributes())
-      end if
-      if (dims_name == this%y%name) then
-        print*, "Read y dimension:"
-        call netcdf_read_coordinate(this%ncid, varid, this%y%get_value())
-        call netcdf_read_attribute(this%ncid, varid, this%y%get_attributes())
-      end if
-      if (dims_name == this%z%name) then
-        print*, "Read z dimension:"
-        call netcdf_read_coordinate(this%ncid, varid, this%z%get_value())
-        call netcdf_read_attribute(this%ncid, varid, this%z%get_attributes())
-      end if
-      if (dims_name == this%t%name) then
-        print*, "Read t dimension:"
-        call netcdf_read_coordinate(this%ncid, varid, this%t%get_value())
-        call netcdf_read_attribute(this%ncid, varid, this%t%get_attributes())
-      end if
-    end do
-
-    print*, "Read variable:"
     call netcdf_read_variable(this%ncid, this%variables)
 
-    print*, "Read global attribute:"
     call netcdf_read_attribute(this%ncid, nf90_global, this%get_attributes())
 
     call check(nf90_close(this%ncid))
-
-    print*, "   --- finished reading ---   "
 
   end subroutine read_netcdf
 
 
   subroutine write_netcdf(this)
 
-    class(netcdf_type), intent(inout) :: this
-  
-    integer                           :: dims_number
-    integer                           :: varid
-    integer                           :: x_dimid
-    integer                           :: y_dimid
-    integer                           :: z_dimid
-    integer                           :: t_dimid
-    integer, allocatable              :: dimids(:)
-    integer                           :: i
+    class(netcdf_type)    , intent(inout) :: this
 
     if (this%iotype /= "w" .and. this%iotype /= "write") stop "Error: should be write model."
-    
-    dims_number = 0
 
-    if (allocated(this%x%name)) then
-      print*, "Define x dimension:"
-      call netcdf_define_coordinate(this%ncid, this%x%name, this%x%length(), this%x%xtype, x_dimid, varid)
-      call netcdf_define_attribute(this%ncid, varid, this%x%get_attributes())
-      call this%x%set_varid(varid)
-      dims_number = dims_number + 1
-    end if
+    call netcdf_define_coordinate(this%ncid, this%dimensions)
 
-    if (allocated(this%y%name)) then
-      print*, "Define y dimension:"
-      call netcdf_define_coordinate(this%ncid, this%y%name, this%y%length(), this%y%xtype, y_dimid, varid)
-      call netcdf_define_attribute(this%ncid, varid, this%y%get_attributes())
-      call this%y%set_varid(varid)
-      dims_number = dims_number + 1
-    end if
+    call netcdf_define_variable(this%ncid, this%variables, this%dimensions)
 
-    if (allocated(this%z%name)) then
-      print*, "Define z dimension:"
-      call netcdf_define_coordinate(this%ncid, this%z%name, this%z%length(), this%z%xtype, z_dimid, varid)
-      call netcdf_define_attribute(this%ncid, varid, this%z%get_attributes())
-      call this%z%set_varid(varid)
-      dims_number = dims_number + 1
-    end if
-
-    if (allocated(this%t%name)) then
-      print*, "Define t dimension:"
-      call netcdf_define_coordinate(this%ncid, this%t%name, nf90_unlimited, this%t%xtype, t_dimid, varid)
-      call netcdf_define_attribute(this%ncid, varid, this%t%get_attributes())
-      call this%t%set_varid(varid)
-      dims_number = dims_number + 1
-    end if
-
-    allocate(dimids(dims_number))
-
-    select case (dims_number)
-    case(4)
-      dimids = [x_dimid, y_dimid, z_dimid, t_dimid]
-    case(3)
-      if (allocated(this%z%name)) dimids = [x_dimid, y_dimid, z_dimid]
-      if (allocated(this%t%name)) dimids = [x_dimid, y_dimid, t_dimid]
-    case(2)
-      dimids = [x_dimid, y_dimid]
-    case(1, 0)
-      stop "Error: dimension number of netcdf file can not less than 2."
-    end select
-
-    print*, "Define variable:"
-    call netcdf_define_variable(this%ncid, this%variables, dimids)
-
-    deallocate(dimids)
-
-    print*, "Define global attribute"
     call netcdf_define_attribute(this%ncid, nf90_global, this%get_attributes())
-
-    print*, "hello"
 
     call check(nf90_enddef(this%ncid))
 
-    if (allocated(this%x%name)) then
-      print*, "Write x dimension:"
-      call netcdf_write_coordinate(this%ncid, this%x)
-    end if
+    call netcdf_write_coordinate(this%ncid, this%dimensions)
 
-    if (allocated(this%y%name)) then
-      print*, "Write y dimension:"
-      call netcdf_write_coordinate(this%ncid, this%y)
-    end if
-
-    if (allocated(this%z%name)) then
-      print*, "Write z dimension:"
-      call netcdf_write_coordinate(this%ncid, this%z)
-    end if
-
-    if (allocated(this%t%name)) then
-      print*, "Write t dimension:"
-      call netcdf_write_coordinate(this%ncid, this%t)
-    end if
-
-    print*, "Write variable:"
     call netcdf_write_variable(this%ncid, this%variables)
 
     call check(nf90_close(this%ncid))
-
-    print*, "   --- finished writing ---   "
 
   end subroutine write_netcdf
   

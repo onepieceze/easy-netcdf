@@ -20,33 +20,18 @@ module netcdf_i_mod
   public :: netcdf_write_variable
   
 contains
-  
-  subroutine netcdf_define_coordinate(ncid, dims_name, dims_size, xtype, dimid, varid)
-  
-    integer     , intent(in)  :: ncid
-    character(*), intent(in)  :: dims_name
-    integer     , intent(in)  :: dims_size
-    integer     , intent(in)  :: xtype
-    integer     , intent(out) :: dimid    
-    integer     , intent(out) :: varid
-  
-    call check(nf90_def_dim(ncid, dims_name, dims_size, dimid))
-    call check(nf90_def_var(ncid, dims_name, xtype, dimid, varid))
-
-  end subroutine netcdf_define_coordinate
-
 
   subroutine netcdf_define_attribute(ncid, varid, attributes)
 
     integer                             , intent(in) :: ncid
     integer                             , intent(in) :: varid
     type(linked_list_type)     , pointer, intent(in) :: attributes 
-
+  
     type(linked_list_item_type), pointer             :: item
     integer                                          :: i
-
+  
     if (.not. associated(attributes)) return
-
+  
     do i=1, attributes%size
       item => attributes%item_at(i)
       select type (value => item%value)
@@ -79,59 +64,99 @@ contains
     end do
   
   end subroutine netcdf_define_attribute
+
+  
+  subroutine netcdf_define_coordinate(ncid, dimensions)
+  
+    integer               , intent(in) :: ncid
+    type(linked_list_type), intent(in) :: dimensions
+    
+    type(dimension_type)  , pointer    :: dimension
+    integer                            :: i
+    integer                            :: dimid
+    integer                            :: varid
+
+    do i=1, dimensions%size
+      dimension => dimensions%value_at(i)
+      if (dimension%unlimited) then
+        call check(nf90_def_dim(ncid, dimension%name, nf90_unlimited, dimid))
+      else
+        call check(nf90_def_dim(ncid, dimension%name, dimension%get_length(), dimid))
+      end if
+      call check(nf90_def_var(ncid, dimension%name, dimension%xtype, dimid, varid))
+      call dimension%set_dimid(dimid)
+      call dimension%set_varid(varid)
+      call netcdf_define_attribute(ncid, varid, dimension%get_attributes())
+    end do
+
+  end subroutine netcdf_define_coordinate
   
   
-  subroutine netcdf_define_variable(ncid, variables, dimids)
+  subroutine netcdf_define_variable(ncid, variables, dimensions)
 
     integer                        , intent(in) :: ncid
     type(linked_list_type), pointer, intent(in) :: variables
-    integer                        , intent(in) :: dimids(:)
+    type(linked_list_type), pointer, intent(in) :: dimensions
 
     integer                                     :: varid
-    integer                                     :: i
+    integer                                     :: i, j, k
     type(variable_type)   , pointer             :: variable
-    type(linked_list_type), pointer             :: attributes
+    type(dimension_type)  , pointer             :: dimension
+    character(60)         , allocatable         :: dimensions_name(:)
+    integer               , allocatable         :: dimids(:)
 
     do i=1, variables%size
       variable => variables%value_at(i)
       if (variable%xtype == -99999)   stop "Error: data type of variable not define."
       if (.not. allocated(variable%name)) stop "Error: name attribute of variable not found."
-      print*, " --- "//variable%name
+      call variable%get_dimensions(dimensions_name)
+      allocate(dimids(size(dimensions_name)))
+      do j=1, dimensions%size
+        dimension => dimensions%value_at(j)
+        do k=1, size(dimensions_name)
+          if (dimensions_name(k) == dimension%name) dimids(k) = dimension%get_dimid()
+        end do
+      end do
       call check(nf90_def_var(ncid, variable%name, variable%xtype, dimids, varid))
       call variable%set_varid(varid)
-      attributes => variable%get_attributes()
       call netcdf_define_attribute(ncid, varid, variable%get_attributes())
+      deallocate(dimensions_name)
+      deallocate(dimids)
     end do
       
   end subroutine netcdf_define_variable
 
 
-  subroutine netcdf_write_coordinate(ncid, dims)
+  subroutine netcdf_write_coordinate(ncid, dimensions)
 
-    integer              , intent(in) :: ncid
-    class(dimension_type), intent(in) :: dims
+    integer                , intent(in) :: ncid
+    class(linked_list_type), intent(in) :: dimensions
 
-    integer                           :: varid 
-    integer :: k                       
+    integer                             :: i
+    integer                             :: varid
+    type(dimension_type)   , pointer    :: dimension                   
 
-    if (associated(dims%value)) then
-      varid = dims%get_varid()
-      select type (value => dims%value)
-      type is (integer(2))
-        call check(nf90_put_var(ncid, varid, value))
-      type is (integer(4))
-        call check(nf90_put_var(ncid, varid, value))
-      type is (integer(8))
-        call check(nf90_put_var(ncid, varid, value))
-      type is (real(4))
-        call check(nf90_put_var(ncid, varid, value))
-      type is (real(8))
-        call check(nf90_put_var(ncid, varid, value))
-      end select
-    else
-      stop "  Error: dimension value not set."
-    end if
-
+    do i=1, dimensions%size
+      dimension => dimensions%value_at(i)
+      if (associated(dimension%value)) then
+        varid = dimension%get_varid()
+        select type (value => dimension%value)
+        type is (integer(2))
+          call check(nf90_put_var(ncid, varid, value))
+        type is (integer(4))
+          call check(nf90_put_var(ncid, varid, value))
+        type is (integer(8))
+          call check(nf90_put_var(ncid, varid, value))
+        type is (real(4))
+          call check(nf90_put_var(ncid, varid, value))
+        type is (real(8))
+          call check(nf90_put_var(ncid, varid, value))
+        end select
+      else
+        stop "  Error: dimension value not set."
+      end if
+    end do
+      
   end subroutine netcdf_write_coordinate
 
 
@@ -146,7 +171,6 @@ contains
 
     do i=1, variables%size
       variable => variables%value_at(i)
-      print*, " --- "//variable%name
       varid = variable%get_varid()
       if (associated(variable%value_2d)) then
         select type (value => variable%value_2d)
