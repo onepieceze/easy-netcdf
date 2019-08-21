@@ -32,7 +32,6 @@ xtype:
 int2      int4      int8      real4      real8
 ```
 ### Writing:
-Setting unlimited dimension: time%unlimited = .true.
 ```Fortran
 program write_demo
 
@@ -70,6 +69,10 @@ program write_demo
   call F%write()
 
 end program write_demo
+```
+Setting unlimited dimension:
+```Fortran
+  time%unlimited = .true.
 ```
 ### Reading:
 ```Fortran
