@@ -118,26 +118,26 @@ program read_demo
   
   call F%read()
 
-  print*, "x_long_name:  ", lon_long_name
-  print*, "y_long_name:  ", lat_long_name
-  print*, "author     :  ", author
-  print*, "units      :  ", units
-  print*, "lon        :  ", LON_value
-  print*, "lat        :  ", LAT_value
-  print*, "data       :  ", TMP_value
-  print*, "range      :  ", range
+  print*, "lon_long_name:  ", lon_long_name
+  print*, "lat_long_name:  ", lat_long_name
+  print*, "author       :  ", author
+  print*, "units        :  ", units
+  print*, "lon          :  ", LON_value
+  print*, "lat          :  ", LAT_value
+  print*, "data         :  ", TMP_value
+  print*, "range        :  ", range
 
 end program read_demo
 ```
 Result:
 ```
- x_long_name:  longitude                     
- y_long_name:  latitude                      
- author     :  onepieceze                    
- units      :  K                             
- lon        :             1           2
- lat        :             1           2
- data       :            26          27          28          27
+ lon_long_name:  longitude                     
+ lat_long_name:  latitude                      
+ author       :  onepieceze                    
+ units        :  K                             
+ lon          :             1           2
+ lat          :             1           2
+ data         :            26          27          28          27
 ```
 
 ## Compiler Support
