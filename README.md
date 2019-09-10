@@ -18,7 +18,7 @@ Fortran OOP Interface to the netcdf [fortran library](https://github.com/Unidata
 ## Overview
 This repository is an simple Fortran package to using netcdf library.
 
-Using two open sources code from : [Fortran Date Time Library](https://github.com/dongli/fortran-container.git) & [fortran-container](https://github.com/dongli/fortran-datetime.git)
+Using two open sources code from : [fortran-container](https://github.com/dongli/fortran-datetime.git)
 
 ## Prerequisites:
 Unidata netcdf-fortran library
@@ -138,6 +138,7 @@ Result:
  lon          :             1           2
  lat          :             1           2
  data         :            26          27          28          27
+ range        :          -100         100
 ```
 
 ## Compiler Support
