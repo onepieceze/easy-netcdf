@@ -18,7 +18,7 @@ Fortran OOP Interface to the netcdf [fortran library](https://github.com/Unidata
 ## Overview
 This repository is an simple Fortran package to using netcdf library.
 
-Using two open sources code from : [Fortran Date Time Library](https://github.com/dongli/fortran-container.git) & [fortran-container](https://github.com/dongli/fortran-datetime.git)
+Using two open sources code from : [fortran-container](https://github.com/dongli/fortran-datetime.git)
 
 ## Prerequisites:
 Unidata netcdf-fortran library
@@ -32,7 +32,6 @@ xtype:
 int2      int4      int8      real4      real8
 ```
 ### Writing:
-Setting unlimited dimension: time%unlimited = .true.
 ```Fortran
 program write_demo
 
@@ -70,6 +69,10 @@ program write_demo
   call F%write()
 
 end program write_demo
+```
+Setting unlimited dimension:
+```Fortran
+  time%unlimited = .true.
 ```
 ### Reading:
 ```Fortran
@@ -115,26 +118,27 @@ program read_demo
   
   call F%read()
 
-  print*, "x_long_name:  ", lon_long_name
-  print*, "y_long_name:  ", lat_long_name
-  print*, "author     :  ", author
-  print*, "units      :  ", units
-  print*, "lon        :  ", LON_value
-  print*, "lat        :  ", LAT_value
-  print*, "data       :  ", TMP_value
-  print*, "range      :  ", range
+  print*, "lon_long_name:  ", lon_long_name
+  print*, "lat_long_name:  ", lat_long_name
+  print*, "author       :  ", author
+  print*, "units        :  ", units
+  print*, "lon          :  ", LON_value
+  print*, "lat          :  ", LAT_value
+  print*, "data         :  ", TMP_value
+  print*, "range        :  ", range
 
 end program read_demo
 ```
 Result:
 ```
- x_long_name:  longitude                     
- y_long_name:  latitude                      
- author     :  onepieceze                    
- units      :  K                             
- lon        :             1           2
- lat        :             1           2
- data       :            26          27          28          27
+ lon_long_name:  longitude                     
+ lat_long_name:  latitude                      
+ author       :  onepieceze                    
+ units        :  K                             
+ lon          :             1           2
+ lat          :             1           2
+ data         :            26          27          28          27
+ range        :          -100         100
 ```
 
 ## Compiler Support
