@@ -1,6 +1,10 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 project(easy-netcdf Fortran)
+
+#if (CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
+#  message(FATAL_ERROR "Error: install directory not define, please use -D CMAKE_INSTALL_PREFIX= <your path> (except /usr/local).")
+#endif()
 
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
   set (CMAKE_Fortran_FLAGS "-ffree-line-length-none -g -fbacktrace")
@@ -33,8 +37,9 @@ set (sources
   src/easy_netcdf.F90
 )
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/example")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/example")
+#set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
 
 add_library (easy_netcdf SHARED ${sources})
 target_link_libraries (easy_netcdf fortran_container netcdff)
